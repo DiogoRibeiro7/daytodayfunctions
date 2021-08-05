@@ -40,6 +40,14 @@ def priorDay(days):
 
 
 def midnightOffset(offset):
+    """[summary]
+
+    Args:
+        offset ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
 
     # Construct a timezone object
     tz = pytz.timezone('Europe/London')
