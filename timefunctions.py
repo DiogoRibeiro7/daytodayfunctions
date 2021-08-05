@@ -5,7 +5,9 @@
 # @modify date 2021-08-05 12:59:48
 # @desc datetime functions to calculate days of the week
 #
+import pytz
 import datetime
+
 
 def priorSaturday():
     """ calculates the previous saturday from today
@@ -15,6 +17,7 @@ def priorSaturday():
     """
     return datetime.datetime.now() - datetime.timedelta(days=((datetime.datetime.now().isoweekday() + 1) % 7))
 
+
 def priorSunday():
     """calculates the previous sunday from today
 
@@ -22,6 +25,7 @@ def priorSunday():
         datetime: datetime object 
     """
     return priorSaturday() + datetime.timedelta(days=1)
+
 
 def priorDay(days):
     """calculates the day before or after the previous saturday
@@ -34,3 +38,22 @@ def priorDay(days):
     """
     return priorSaturday() - datetime.timedelta(days=days)
 
+
+def midnightOffset(offset):
+
+    # Construct a timezone object
+    tz = pytz.timezone('Europe/London')
+
+    # Work out today/now as a timezone-aware datetime
+    today = datetime.datetime.now(tz)
+
+    # Adjust by the offset. Note that that adding 1 day might actually move us 23 or 25
+    # hours into the future, depending on daylight savings. This works because the {today}
+    # variable is timezone aware
+    target_day = today + datetime.timedelta(days=offset)
+
+    # Discard hours, minutes, seconds and microseconds
+    midnight_aware = tz.localize(datetime.datetime.combine(
+        target_day, datetime.time(0, 0, 0, 0)), is_dst=True)
+
+    return midnight_aware
