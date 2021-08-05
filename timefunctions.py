@@ -6,7 +6,9 @@
 # @desc datetime functions to calculate days of the week
 #
 import pytz
+import os
 import datetime
+from dateutil.tz import gettz
 
 
 def priorSaturday():
@@ -15,7 +17,7 @@ def priorSaturday():
     Returns:
         datetime: datetime object 
     """
-    return datetime.datetime.now() - datetime.timedelta(days=((datetime.datetime.now().isoweekday() + 1) % 7))
+    return datetime.datetime.now(gettz(os.environ['TZ'])) - datetime.timedelta(days=((datetime.datetime.now(gettz(os.environ['TZ'])).isoweekday() + 1) % 7))
 
 
 def priorSunday():
@@ -50,7 +52,7 @@ def midnightOffset(offset):
     """
 
     # Construct a timezone object
-    tz = pytz.timezone('Europe/London')
+    tz = gettz(os.environ['TZ'])
 
     # Work out today/now as a timezone-aware datetime
     today = datetime.datetime.now(tz)
