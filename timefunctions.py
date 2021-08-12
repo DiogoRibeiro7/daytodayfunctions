@@ -15,7 +15,7 @@ def priorSaturday():
     """ calculates the previous saturday from today
 
     Returns:
-        datetime: datetime object 
+        datetime: datetime object
     """
     return datetime.datetime.now(gettz(os.environ['TZ'])) - datetime.timedelta(days=((datetime.datetime.now(gettz(os.environ['TZ'])).isoweekday() + 1) % 7))
 
@@ -24,7 +24,7 @@ def priorSunday():
     """calculates the previous sunday from today
 
     Returns:
-        datetime: datetime object 
+        datetime: datetime object
     """
     return priorSaturday() + datetime.timedelta(days=1)
 
@@ -36,7 +36,7 @@ def priorDay(days):
         days (integer): if positive it goes back days, if it is negative it goes foward days
 
     Returns:
-        datetime: datetime object 
+        datetime: datetime object
     """
     return priorSaturday() - datetime.timedelta(days=days)
 
