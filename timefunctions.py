@@ -67,3 +67,69 @@ def midnightOffset(offset):
         target_day, datetime.time(0, 0, 0, 0)), is_dst=True)
 
     return midnight_aware
+
+
+def is_dst(tz, datetime_to_check):
+    """Determine whether or not Daylight Savings Time (DST)
+    is currently in effect"""
+
+    # Jan 1 of this year, when all tz assumed to not be in dst
+    non_dst = datetime.datetime(
+        year=datetime.datetime.now().year, month=1, day=1)
+    # Make time zone aware based on tz passed in
+    non_dst_tz_aware = pytz.timezone(tz).localize(non_dst)
+
+    # if DST is in effect, their offsets will be different
+    return not (non_dst_tz_aware.utcoffset() == datetime_to_check.utcoffset())
+
+#################################################
+# Test cases
+#################################################
+
+
+# DST in Eastern ends Nov 1, 2020 at 2 am
+timezone_eastern = 'US/Eastern'
+datetime_dst_eastern = pytz.timezone(timezone_eastern).localize(
+    datetime.datetime(year=2020, month=11, day=1))
+datetime_non_dst_eastern = pytz.timezone(timezone_eastern).localize(
+    datetime.datetime(year=2020, month=11, day=2))
+# should print True
+print(timezone_eastern, datetime_dst_eastern, "is in dst:",
+      is_dst(timezone_eastern, datetime_dst_eastern))
+# should print False
+print(timezone_eastern, datetime_non_dst_eastern, "is in dst:",
+      is_dst(timezone_eastern, datetime_non_dst_eastern))
+
+# DST in Jerusalem ends Oct 25, 2020 at 2 am
+timezone_jerusalem = 'Asia/Jerusalem'
+datetime_dst_jerusalem = pytz.timezone(timezone_jerusalem).localize(
+    datetime.datetime(year=2020, month=10, day=25))
+datetime_non_dst_jerusalem = pytz.timezone(timezone_jerusalem).localize(
+    datetime.datetime(year=2020, month=10, day=26))
+# should print True
+print(timezone_jerusalem, datetime_dst_jerusalem, "is in dst:",
+      is_dst(timezone_jerusalem, datetime_dst_jerusalem))
+# should print False
+print(timezone_jerusalem, datetime_non_dst_jerusalem, "is in dst:",
+      is_dst(timezone_jerusalem, datetime_non_dst_jerusalem))
+
+# DST in Sydney ends Oct 4, 2020 at 2 am
+timezone_sydney = 'Australia/Sydney'
+datetime_dst_sydney = pytz.timezone(timezone_sydney).localize(
+    datetime.datetime(year=2020, month=10, day=4))
+datetime_non_dst_sydney = pytz.timezone(timezone_sydney).localize(
+    datetime.datetime(year=2020, month=10, day=5))
+# should print True
+print(timezone_sydney, datetime_dst_sydney, "is in dst:",
+      is_dst(timezone_sydney, datetime_dst_sydney))
+# should print False
+print(timezone_sydney, datetime_non_dst_sydney, "is in dst:",
+      is_dst(timezone_sydney, datetime_non_dst_sydney))
+
+# try with your timezone and current time
+timezone_local = 'US/Pacific'
+# try with different values of timedelta days; 0 will give current timestamp
+datetime_now = pytz.timezone(timezone_local).localize(
+    datetime.datetime.now() - datetime.timedelta(days=0))
+print(timezone_local, datetime_now, "is in dst:",
+      is_dst(timezone_local, datetime_now))
