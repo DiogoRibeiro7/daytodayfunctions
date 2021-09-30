@@ -1,22 +1,90 @@
 import pandas as pd
+import numpy as np
+from mysense.utils import ewma
 import pytest 
+
+PERIOD = 12  # hours to discount to shift the toilet use from the night period to the previous day
+SPANS = [7]
+PERIODS = ['day', 'night']
+night_time = 9
+day_time = 21
 
 @pytest.fixture(scope='module')
 def data():
-    df = pd.DataFrame([[0, 2, 6, 4, 8],
-                         [1, 7, 5, 3, 7],
-                         [1, 1, 1, 8, 9],
-                         [0, 2, 3, 3, 6],
-                         [0, 5, 3, 4, 9]], 
-                        columns = [f'feature_{i}' if i!=0 
-                                  else 'class' for i in range(5)])
+    df = pd.DataFrame()
     return df
 
 
-def aggregate_mean(df, column):
-    return df.groupby("class")[column].mean().to_dict()
+def get_regular_avg(new_value, current_average, sd, span):
+    """
+
+    :param new_value:
+    :param current_average:
+    :param sd:
+    :return:
+    """
+    if current_average == 0:
+        return new_value, 0
+    else:
+        returned = ewma(new_value, current_average, sd, span)
+        return returned[0], returned[1]
+
+def day_key_to_update_avg(x,period):
+    if period == 'day':
+        return f"{x}DayAverageDay"
+    else:
+        return f"{x}DayAverageNight"
+
+def day_key_to_update_std(x,period):
+    if period == 'day':
+        return f"{x}DayStdDay"
+    else:
+        return f"{x}DayStdNight"
+
+def update_stats(x,period):
+    if period == 'day':
+        return f"{x}DayAverage"
+    else:
+        return f"{x}NightAverage"
+
+def update_u_info_avg(x,period):
+    if period == 'day':
+        return f"{x}DayAverage"
+    else:
+        return f"{x}NightAverage"
+
+def update_u_info_std(x,period):
+    if period == 'day':
+        return f"{x}DayStd"
+    else:
+        return f"{x}NightStd"
 
 
-@pytest.mark.parametrize("column, expected", [("feature_1", {0: 3, 1: 4}), ("feature_2", {0: 4, 1: 3})])
-def test_aggregate_mean_feature_1(data, column, expected):   
-    assert expected == aggregate_mean(data, column)
+def toiletMovingAverage(df):
+    
+    if df is None:
+        return pd.DataFrame()
+    if df.empty: # get out of the fucntion, the user does't have data
+        return df
+
+    for period in PERIODS:
+        for span in SPANS:
+            current_avg = 0
+            current_std = 0
+            df[day_key_to_update_avg(span,period)] = 0
+            df[day_key_to_update_std(span,period)] = 0
+            for row in df.itertuples():
+                value_toilet = df.loc[row[0], period]
+                current_avg,current_std = get_regular_avg(value_toilet,current_avg,current_std,span) #apply the function ewma
+                df.loc[row[0],day_key_to_update_avg(span,period)] = np.round(current_avg,2) # create the avg column
+                df.loc[row[0],day_key_to_update_std(span,period)] = np.round(current_std,2) # create the std column
+
+    return df
+
+
+
+
+
+@pytest.mark.parametrize("expected", pd.DataFrame())
+def test_aggregate_mean_feature_1(data,expected):   
+    assert expected == toiletMovingAverage(pd.DataFrame())
