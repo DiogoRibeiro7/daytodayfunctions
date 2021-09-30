@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from mysense.utils import ewma
 import pytest 
+from pandas.testing import assert_frame_equal
 
 PERIOD = 12  # hours to discount to shift the toilet use from the night period to the previous day
 SPANS = [7]
@@ -9,11 +10,20 @@ PERIODS = ['day', 'night']
 night_time = 9
 day_time = 21
 
-@pytest.fixture(scope='module')
-def data():
+def load_data_1():
     df = pd.DataFrame()
     return df
 
+def load_data_2():
+    df = pd.DataFrame([[2,3]],
+                      columns =['day','night'])
+    return df
+
+def load_data_3():
+    df = pd.DataFrame([[2,3],
+                      [0,1]],
+                      columns =['day','night'])
+    return df
 
 def get_regular_avg(new_value, current_average, sd, span):
     """
@@ -85,6 +95,27 @@ def toiletMovingAverage(df):
 
 
 
-@pytest.mark.parametrize("expected", pd.DataFrame())
-def test_aggregate_mean_feature_1(data,expected):   
-    assert expected == toiletMovingAverage(pd.DataFrame())
+
+def test_toiletMovingAverage_1():   
+    data = load_data_1()
+    expected = pd.DataFrame()
+    assert_frame_equal(expected.reset_index(drop=True),toiletMovingAverage(data).reset_index(drop=True))
+
+def test_toiletMovingAverage_2():
+    data = None
+    expected = pd.DataFrame()
+    assert_frame_equal(expected.reset_index(drop=True),toiletMovingAverage(data).reset_index(drop=True))
+
+def test_toiletMovingAverage_3():
+    data = load_data_2()
+    expected = pd.DataFrame([[2,3,2,0,3,0]],
+                      columns =['day','night','7DayAverageDay','7DayStdDay','7DayAverageNight','7DayStdNight'])
+    assert_frame_equal(expected.reset_index(drop=True),toiletMovingAverage(data).reset_index(drop=True))
+
+def test_toiletMovingAverage_4():
+    data = load_data_3()
+    expected = pd.DataFrame([[2,3,2,0,3,0],
+                             [0,1,1.5,0.87,2.5,0.87]],
+                      columns =['day','night','7DayAverageDay','7DayStdDay','7DayAverageNight','7DayStdNight'])
+    assert_frame_equal(expected.reset_index(drop=True),toiletMovingAverage(data).reset_index(drop=True))
+
