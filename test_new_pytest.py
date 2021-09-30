@@ -119,3 +119,10 @@ def test_toiletMovingAverage_4():
                       columns =['day','night','7DayAverageDay','7DayStdDay','7DayAverageNight','7DayStdNight'])
     assert_frame_equal(expected.reset_index(drop=True),toiletMovingAverage(data).reset_index(drop=True))
 
+def test_get_regular_avg_1():
+    expected = (7,0)
+    assert expected == get_regular_avg(7, 0, 0, 7)
+    
+def test_get_regular_avg_2():
+    expected = (2.5, 2.598076211353316)
+    assert expected == get_regular_avg(7, 1, 0, 7)
