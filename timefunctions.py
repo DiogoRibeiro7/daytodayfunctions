@@ -133,3 +133,5 @@ datetime_now = pytz.timezone(timezone_local).localize(
     datetime.datetime.now() - datetime.timedelta(days=0))
 print(timezone_local, datetime_now, "is in dst:",
       is_dst(timezone_local, datetime_now))
+
+
